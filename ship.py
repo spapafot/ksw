@@ -113,9 +113,11 @@ class Ship:
             "timetables": []
         }
 
+
         for i in valid_timetables:
             for x in range(len(i)):
                 time = i[x].strftime("%H:%M")
+
                 if self.starting_port == "H":
                     if x % 2 == 0:
                         starting_port = self.starting_port
@@ -126,9 +128,11 @@ class Ship:
                         starting_port = self.starting_port
                     else:
                         starting_port = "H"
-                dict_["timetables"].append({time: starting_port})
 
-        print(dict_)
+                dict_["timetables"].append({time:starting_port})
+
+        return dict_
+
 
 
 
