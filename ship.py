@@ -2,13 +2,14 @@ import datetime
 
 
 class Ship:
-    def __init__(self, total_departures, duration, name, starting_port, start, schedule=[]):
+    def __init__(self, total_departures, duration, name, starting_port, start, schedule=[], timetables=None):
         self.start = start
         self.starting_port = starting_port
         self.name = name
         self.duration = duration
         self.total_departures = total_departures
         self.schedule = schedule
+        self.timetables = timetables
         self.set_default_values()
         self.create_schedule()
 
@@ -105,33 +106,8 @@ class Ship:
             if b:
                 if i not in valid_:
                     valid_.append(i)
-        return valid_
+        self.timetables = valid_
 
-    def convert_to_dict(self, valid_timetables):
-        dict_ = {
-            "ship": self.name,
-            "timetables": []
-        }
-
-
-        for i in valid_timetables:
-            for x in range(len(i)):
-                time = i[x].strftime("%H:%M")
-
-                if self.starting_port == "H":
-                    if x % 2 == 0:
-                        starting_port = self.starting_port
-                    else:
-                        starting_port = "K"
-                else:
-                    if x % 2 == 0:
-                        starting_port = self.starting_port
-                    else:
-                        starting_port = "H"
-
-                dict_["timetables"].append({time:starting_port})
-
-        return dict_
 
 
 
