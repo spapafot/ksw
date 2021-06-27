@@ -71,8 +71,12 @@ class Ship:
             while sch_[t] > sch_[t - 1] + time_needed:
                 sch_[t] = sch_[t] - self.step
                 all += sch_
-                if sch_[3] - sch_[2] >= time_needed + 3 * self.break_:
-                    t += 1
+                if self.total_departures >= 4:
+                    if sch_[3] - sch_[2] >= time_needed + 3 * self.break_:
+                        t += 1
+                else:
+                    if sch_[2] - sch_[1] >= time_needed + 3 * self.break_:
+                        t += 1
             t += 1
         return all
 
