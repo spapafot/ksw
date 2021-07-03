@@ -2,13 +2,14 @@ import datetime
 
 
 class Ship:
-    def __init__(self, total_departures, duration, name, starting_port, start, schedule=[]):
+    def __init__(self, total_departures, duration, name, starting_port, start, schedule=[], timetables=None):
         self.start = start
         self.starting_port = starting_port
         self.name = name
         self.duration = duration
         self.total_departures = total_departures
         self.schedule = schedule
+        self.timetables = timetables
         self.set_default_values()
         self.create_schedule()
 
@@ -70,10 +71,15 @@ class Ship:
             while sch_[t] > sch_[t - 1] + time_needed:
                 sch_[t] = sch_[t] - self.step
                 all += sch_
-                if sch_[3] - sch_[2] >= time_needed + 3 * self.break_:
-                    t += 1
+                if self.total_departures >= 4:
+                    if sch_[3] - sch_[2] >= time_needed + 3 * self.break_:
+                        t += 1
+                else:
+                    if sch_[2] - sch_[1] >= time_needed + 3 * self.break_:
+                        t += 1
             t += 1
         return all
+
 
     def check_valid_break(self, schedule):
         x = False
@@ -105,32 +111,6 @@ class Ship:
             if b:
                 if i not in valid_:
                     valid_.append(i)
-        return valid_
-
-    def convert_to_dict(self, valid_timetables):
-        dict_ = {
-            "ship": self.name,
-            "timetables": []
-        }
-
-        for i in valid_timetables:
-            for x in range(len(i)):
-                time = i[x].strftime("%H:%M")
-                if self.starting_port == "H":
-                    if x % 2 == 0:
-                        starting_port = self.starting_port
-                    else:
-                        starting_port = "K"
-                else:
-                    if x % 2 == 0:
-                        starting_port = self.starting_port
-                    else:
-                        starting_port = "H"
-                dict_["timetables"].append({time: starting_port})
-
-        print(dict_)
-
-
-
+        self.timetables = valid_
 
 
