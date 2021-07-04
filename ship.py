@@ -80,7 +80,6 @@ class Ship:
             t += 1
         return all
 
-
     def check_valid_break(self, schedule):
         x = False
         t = self.total_departures - 1
@@ -112,5 +111,10 @@ class Ship:
                 if i not in valid_:
                     valid_.append(i)
         self.timetables = valid_
+
+
+
+
+
 
 
