@@ -60,8 +60,8 @@ while not all_tables:
 
 
 for port in all_tables:
-    igo_table = [[x.strftime("%H:%M"),y] for x,y in port[0]]
-    cfu_table = [[x.strftime("%H:%M"),y] for x,y in port[1]]
+    igo_table = [[x.strftime("%H:%M"), y] for x, y in port[0]]
+    cfu_table = [[x.strftime("%H:%M"), y] for x, y in port[1]]
 
 igo_times = [x[0] for x in igo_table]
 igo_ships = [x[1] for x in igo_table]
