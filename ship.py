@@ -58,13 +58,18 @@ class Ship:
         t = self.total_departures - 1
         time_needed = self.trip_time + self.loading + self.unloading
 
-        while sch_[t] + self.trip_time + self.unloading <= self.shift_end - self.step:
-            sch_[t] = sch_[t] + self.step
-            all += sch_
-            for i in range(t, 1, -1):
-                while sch_[i] - time_needed >= sch_[i - 1]:
-                    sch_[i - 1] = sch_[i - 1] + self.step
-                    all += sch_
+        try:
+            while sch_[t] + self.trip_time + self.unloading <= self.shift_end - self.step:
+                sch_[t] = sch_[t] + self.step
+                all += sch_
+                for i in range(t, 1, -1):
+                    while sch_[i] - time_needed >= sch_[i - 1]:
+                        sch_[i - 1] = sch_[i - 1] + self.step
+                        all += sch_
+        except IndexError:
+            print("ΠΛΟΙΟ ΕΚΤΟΣ ΩΡΑΡΙΟΥ")
+            exit()
+
 
         t = 1
         while t < self.total_departures:
@@ -78,6 +83,7 @@ class Ship:
                     if sch_[2] - sch_[1] >= time_needed + 3 * self.break_:
                         t += 1
             t += 1
+
         return all
 
     def check_valid_break(self, schedule):

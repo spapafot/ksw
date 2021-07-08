@@ -3,12 +3,12 @@ import pandas as pd
 import datetime
 import random
 
-ermis = Ship(name="ΕΡΜΗΣ", start=[9, 15], total_departures=6, starting_port="K", duration=[1, 15])
-eleni = Ship(name="ΕΛΕΝΗ", start=[3, 0], total_departures=4, starting_port="H", duration=[1, 45])
+ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=6, starting_port="K", duration=[1, 15])
+eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
 eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
-nanti = Ship(name="ΝΑΝΤΗ", start=[11, 0], total_departures=4, starting_port="H", duration=[1, 45])
+nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
 ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="H", duration=[1, 30])
-spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[12, 0], total_departures=4, starting_port="H", duration=[1, 30])
+spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=4, starting_port="K", duration=[1, 30])
 
 ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
 
@@ -39,7 +39,6 @@ all_ = gen_new(ships)
 igo_ = [x[0] for x in all_[0]]
 cfu_ = [x[0] for x in all_[1]]
 
-
 num = 0
 all_tables = []
 time = datetime.timedelta(minutes=30)
@@ -50,14 +49,17 @@ while not all_tables:
             all_tables.append(all_)
             break
         else:
-            if igo_[num] <= igo_[num+1] - time and cfu_[num] <= cfu_[num+1] - time:
-                 num += 1
-            else:
-                all_ = gen_new(ships)
-                igo_ = [x[0] for x in all_[0]]
-                cfu_ = [x[0] for x in all_[1]]
-                num = 0
-
+            try:
+                if igo_[num] <= igo_[num+1] - time and cfu_[num] <= cfu_[num+1] - time:
+                     num += 1
+                else:
+                    all_ = gen_new(ships)
+                    igo_ = [x[0] for x in all_[0]]
+                    cfu_ = [x[0] for x in all_[1]]
+                    num = 0
+            except IndexError:
+                print("ΔΙΑΦΟΡΕΤΙΚΟΣ ΑΡΙΘΜΟΣ ΔΡΟΜΟΛΟΓΙΩΝ ΑΠΟ ΛΙΜΑΝΙ ΣΕ ΛΙΜΑΝΙ")
+                exit()
 
 for port in all_tables:
     igo_table = [[x.strftime("%H:%M"), y] for x, y in port[0]]
@@ -69,7 +71,7 @@ cfu_times = [x[0] for x in cfu_table]
 cfu_ships = [x[1] for x in cfu_table]
 
 with pd.ExcelWriter("empty.xlsx", engine="xlsxwriter") as writer:
-    pd.DataFrame(list(map(list, zip(igo_times,igo_ships,cfu_times, cfu_ships))),
-                 columns=['H','','K','']
+    pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
+                 columns=['H', '', 'K', '']
                  ).to_excel(writer, sheet_name='1', startrow=1, startcol=1, index=False)
 
