@@ -3,11 +3,11 @@ import pandas as pd
 import datetime
 import random
 
-ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=6, starting_port="K", duration=[1, 15])
+ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=4, starting_port="K", duration=[1, 15])
 eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
 eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
 nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
-ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="H", duration=[1, 30])
+ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="K", duration=[1, 30])
 spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=4, starting_port="K", duration=[1, 30])
 
 ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
@@ -72,6 +72,19 @@ cfu_ships = [x[1] for x in cfu_table]
 
 with pd.ExcelWriter("empty.xlsx", engine="xlsxwriter") as writer:
     pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
-                 columns=['H', '', 'K', '']
-                 ).to_excel(writer, sheet_name='1', startrow=1, startcol=1, index=False)
+                 columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ']
+                 ).to_excel(writer, sheet_name='1', startrow=1, startcol=0, index=False)
 
+
+
+df2 = pd.read_excel("empty.xlsx", names=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ2'])
+eleni = df2.loc[df2["ΠΛΟΙΟ"] == "ΕΛΕΝΗ", "H"]
+eleni_ = df2.loc[df2["ΠΛΟΙΟ2"] == "ΕΛΕΝΗ", "K"]
+
+print(eleni)
+print(eleni_)
+
+with pd.ExcelWriter("new.xlsx", engine="xlsxwriter") as writer:
+    pd.DataFrame(list(map(list, zip(eleni_, eleni))),
+                 columns=[['K', 'H']]
+                 ).to_excel(writer, sheet_name='1', startrow=1, startcol=1, index=False)
