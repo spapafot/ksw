@@ -3,12 +3,12 @@ import pandas as pd
 import datetime
 import random
 
-ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=4, starting_port="K", duration=[1, 15])
+ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=6, starting_port="K", duration=[1, 15])
 eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
 eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
 nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
-ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="H", duration=[1, 30])
-spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=4, starting_port="K", duration=[1, 30])
+ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=5, starting_port="H", duration=[1, 30])
+spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=5, starting_port="K", duration=[1, 30])
 
 ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
 
@@ -86,7 +86,7 @@ for i in ships:
     pd.DataFrame(list(map(list, zip(cfu_data, igo_data))),
                  columns=['K', 'H'],
                  ).to_excel(timetables_writer, sheet_name='1', startrow=counter, startcol=1, index=False)
-    counter += 4
+    counter += 5
 
 pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
              columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
