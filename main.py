@@ -7,7 +7,7 @@ ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=4, starting_port
 eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
 eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
 nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
-ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="K", duration=[1, 30])
+ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=4, starting_port="H", duration=[1, 30])
 spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=4, starting_port="K", duration=[1, 30])
 
 ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
@@ -22,7 +22,7 @@ def gen_new(ships):
     cfu_ = []
     for ship in ships:
         port = ship.starting_port
-        num = random.randint(0, len(ship.timetables)-1)
+        num = random.randint(0, len(ship.timetables) - 1)
         for departure in ship.timetables[num]:
             if port == "H":
                 igo_.append([departure, ship.name])
@@ -45,13 +45,13 @@ time = datetime.timedelta(minutes=30)
 
 while not all_tables:
     for _ in igo_:
-        if num == len(igo_)-1:
+        if num == len(igo_) - 1:
             all_tables.append(all_)
             break
         else:
             try:
-                if igo_[num] <= igo_[num+1] - time and cfu_[num] <= cfu_[num+1] - time:
-                     num += 1
+                if igo_[num] <= igo_[num + 1] - time and cfu_[num] <= cfu_[num + 1] - time:
+                    num += 1
                 else:
                     all_ = gen_new(ships)
                     igo_ = [x[0] for x in all_[0]]
@@ -70,21 +70,26 @@ igo_ships = [x[1] for x in igo_table]
 cfu_times = [x[0] for x in cfu_table]
 cfu_ships = [x[1] for x in cfu_table]
 
-with pd.ExcelWriter("empty.xlsx", engine="xlsxwriter") as writer:
+with pd.ExcelWriter("temp.xlsx", engine="xlsxwriter") as writer:
     pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
-                 columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ']
+                 columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
                  ).to_excel(writer, sheet_name='1', startrow=1, startcol=0, index=False)
 
+counter = 1
+timetables_writer = pd.ExcelWriter("final.xlsx", engine="xlsxwriter")
 
+for i in ships:
+    data = pd.read_excel("temp.xlsx", names=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_'])
+    igo_data = data.loc[data["ΠΛΟΙΟ"] == i.name, "H"]
+    cfu_data = data.loc[data["ΠΛΟΙΟ_"] == i.name, "K"]
 
-df2 = pd.read_excel("empty.xlsx", names=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ2'])
-eleni = df2.loc[df2["ΠΛΟΙΟ"] == "ΕΛΕΝΗ", "H"]
-eleni_ = df2.loc[df2["ΠΛΟΙΟ2"] == "ΕΛΕΝΗ", "K"]
+    pd.DataFrame(list(map(list, zip(cfu_data, igo_data))),
+                 columns=['K', 'H'],
+                 ).to_excel(timetables_writer, sheet_name='1', startrow=counter, startcol=1, index=False)
+    counter += 4
 
-print(eleni)
-print(eleni_)
+pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
+             columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
+             ).to_excel(timetables_writer, sheet_name='1', startrow=1, startcol=4, index=False)
 
-with pd.ExcelWriter("new.xlsx", engine="xlsxwriter") as writer:
-    pd.DataFrame(list(map(list, zip(eleni_, eleni))),
-                 columns=[['K', 'H']]
-                 ).to_excel(writer, sheet_name='1', startrow=1, startcol=1, index=False)
+timetables_writer.save()
