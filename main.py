@@ -1,4 +1,5 @@
 from ship import Ship
+from itertools import cycle, zip_longest
 import pandas as pd
 import datetime
 import random
@@ -6,9 +7,9 @@ import random
 ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=6, starting_port="K", duration=[1, 15])
 eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
 eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
-nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
+nanti = Ship(name="ΝΑΝΤΗ", start=[9, 0], total_departures=4, starting_port="H", duration=[1, 45])
 ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=5, starting_port="H", duration=[1, 30])
-spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[13, 0], total_departures=5, starting_port="K", duration=[1, 30])
+spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[12, 30], total_departures=5, starting_port="K", duration=[1, 30])
 
 ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
 
@@ -71,7 +72,7 @@ cfu_times = [x[0] for x in cfu_table]
 cfu_ships = [x[1] for x in cfu_table]
 
 with pd.ExcelWriter("temp.xlsx", engine="xlsxwriter") as writer:
-    pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
+    pd.DataFrame(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships)),
                  columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
                  ).to_excel(writer, sheet_name='1', startrow=1, startcol=0, index=False)
 
@@ -83,12 +84,12 @@ for i in ships:
     igo_data = data.loc[data["ΠΛΟΙΟ"] == i.name, "H"]
     cfu_data = data.loc[data["ΠΛΟΙΟ_"] == i.name, "K"]
 
-    pd.DataFrame(list(map(list, zip(cfu_data, igo_data))),
+    pd.DataFrame(map(list, zip_longest(igo_data, cfu_data)),
                  columns=['K', 'H'],
                  ).to_excel(timetables_writer, sheet_name='1', startrow=counter, startcol=1, index=False)
     counter += 5
 
-pd.DataFrame(list(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships))),
+pd.DataFrame(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships)),
              columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
              ).to_excel(timetables_writer, sheet_name='1', startrow=1, startcol=4, index=False)
 
