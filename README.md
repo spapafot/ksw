@@ -1,6 +1,6 @@
 # Ferry Schedule Creator
 
-Creates ferry schedule compbinations that are compliant with the Greek legislation 
+Creates ferry schedule combinations that are compliant with the Greek legislation 
 
 It takes loading - unloading duration, trip duration and starting time
 
