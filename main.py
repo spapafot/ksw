@@ -4,93 +4,101 @@ import pandas as pd
 import datetime
 import random
 
-ermis = Ship(name="ΕΡΜΗΣ", start=[8, 45], total_departures=6, starting_port="K", duration=[1, 15])
-eleni = Ship(name="ΕΛΕΝΗ", start=[3, 30], total_departures=4, starting_port="H", duration=[1, 45])
-eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[7, 30], total_departures=4, starting_port="K", duration=[1, 45])
-nanti = Ship(name="ΝΑΝΤΗ", start=[9, 0], total_departures=4, starting_port="H", duration=[1, 45])
-ionas = Ship(name="ΙΩΝΑΣ", start=[5, 30], total_departures=5, starting_port="H", duration=[1, 30])
-spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[12, 30], total_departures=5, starting_port="K", duration=[1, 30])
+ermis = Ship(name="ΕΡΜΗΣ", start=[9, 0], total_departures=4, starting_port="K", duration=[1, 15])
+spyridon = Ship(name="ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ", start=[12, 45], total_departures=4, starting_port="K", duration=[1, 30])
+eirini = Ship(name="ΑΓΙΑ ΕΙΡΗΝΗ", start=[6, 0], total_departures=3, starting_port="K", duration=[1, 45])
 
-ships = [ermis, ionas, spyridon, eleni, eirini, nanti]
+eleni = Ship(name="ΕΛΕΝΗ", start=[2, 30], total_departures=3, starting_port="H", duration=[1, 45])
+nanti = Ship(name="ΝΑΝΤΗ", start=[10, 0], total_departures=4, starting_port="H", duration=[1, 45])
+ionas = Ship(name="ΙΩΝΑΣ", start=[5, 15], total_departures=4, starting_port="H", duration=[1, 30])
 
-for i in ships:
-    random_ = i.create_random_schedules()
-    i.clean_data(random_)
+theodora = Ship(name="ΑΓΙΑ ΘΕΟΔΩΡΑ", start=[9, 30], total_departures=4, starting_port="K", duration=[1, 30])
+express = Ship(name="ΚΕΡΚΥΡΑ ΕΞΠΡΕΣ", start=[10, 00], total_departures=4, starting_port="K", duration=[1, 15])
+kerkira = Ship(name="ΚΕΡΚΥΡΑ", start=[11, 45], total_departures=3, starting_port="K", duration=[1, 45])
 
+alkinoos = Ship(name="ΑΛΚΙΝΟΟΣ", start=[8, 30], total_departures=3, starting_port="H", duration=[1, 45])
+menekratis = Ship(name="ΜΕΝΕΚΡΑΤΗΣ", start=[7, 15], total_departures=4, starting_port="H", duration=[1, 45])
+hora = Ship(name="ΑΝΩ ΧΩΡΑ ΙΙ", start=[4, 00], total_departures=4, starting_port="H", duration=[1, 30])
 
-def gen_new(ships):
-    igo_ = []
-    cfu_ = []
-    for ship in ships:
-        port = ship.starting_port
-        num = random.randint(0, len(ship.timetables) - 1)
-        for departure in ship.timetables[num]:
-            if port == "H":
-                igo_.append([departure, ship.name])
-                port = "K"
-            else:
-                cfu_.append([departure, ship.name])
-                port = "H"
-    igo_.sort()
-    cfu_.sort()
-    return [igo_, cfu_]
+ships = [ermis, eleni, eirini, nanti, ionas, spyridon, hora, theodora, express, alkinoos, menekratis, kerkira]
+N = 30
 
+def generate_random_timetables():
+    timetables = []
 
-all_ = gen_new(ships)
-igo_ = [x[0] for x in all_[0]]
-cfu_ = [x[0] for x in all_[1]]
-
-num = 0
-all_tables = []
-time = datetime.timedelta(minutes=30)
-
-while not all_tables:
-    for _ in igo_:
-        if num == len(igo_) - 1:
-            all_tables.append(all_)
-            break
+    for i in ships:
+        if i.starting_port == "H":
+            ports = cycle(("H", "K"))
         else:
-            try:
-                if igo_[num] <= igo_[num + 1] - time and cfu_[num] <= cfu_[num + 1] - time:
-                    num += 1
+            ports = cycle(("K", "H"))
+        schedule = i.schedules[random.randint(0, len(i.schedules)-1)]
+        timetables.append({
+            "name": i.name,
+            "schedule": [{next(ports): x.strftime("%H:%M")} for x in schedule]
+        })
+    return timetables
+
+
+def create_dataframe(timetables):
+    igo_cfu = []
+    cfu_igo = []
+
+    for d in timetables:
+        for i in d['schedule']:
+            for key, value in i.items():
+                if key == "H":
+                    igo_cfu.append(f"{value} {d['name']}")
                 else:
-                    all_ = gen_new(ships)
-                    igo_ = [x[0] for x in all_[0]]
-                    cfu_ = [x[0] for x in all_[1]]
-                    num = 0
-            except IndexError:
-                print("ΔΙΑΦΟΡΕΤΙΚΟΣ ΑΡΙΘΜΟΣ ΔΡΟΜΟΛΟΓΙΩΝ ΑΠΟ ΛΙΜΑΝΙ ΣΕ ΛΙΜΑΝΙ")
-                exit()
+                    cfu_igo.append(f"{value} {d['name']}")
 
-for port in all_tables:
-    igo_table = [[x.strftime("%H:%M"), y] for x, y in port[0]]
-    cfu_table = [[x.strftime("%H:%M"), y] for x, y in port[1]]
+    df = pd.DataFrame(data=(sorted(igo_cfu), sorted(cfu_igo))).transpose()
+    df[['IGO-CFU', 'IGO_SHIP']] = df[0].str.split(' ', 1, expand=True)
+    df[['CFU-IGO', 'CFU_SHIP']] = df[1].str.split(' ', 1, expand=True)
+    df = df.drop([0, 1], axis=1)
 
-igo_times = [x[0] for x in igo_table]
-igo_ships = [x[1] for x in igo_table]
-cfu_times = [x[0] for x in cfu_table]
-cfu_ships = [x[1] for x in cfu_table]
+    return df
 
-with pd.ExcelWriter("temp.xlsx", engine="xlsxwriter") as writer:
-    pd.DataFrame(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships)),
-                 columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
-                 ).to_excel(writer, sheet_name='1', startrow=1, startcol=0, index=False)
 
+def check(timetables, n=N):
+    n = datetime.timedelta(minutes=n)
+    ig = []
+    cf = []
+    for d in timetables:
+        for i in d['schedule']:
+            for key, value in i.items():
+                if key == "H":
+                    ig.append(datetime.datetime.strptime(value, "%H:%M"))
+                else:
+                    cf.append(datetime.datetime.strptime(value, "%H:%M"))
+    ig = sorted(ig)
+    cf = sorted(cf)
+
+    if (all(y - x >= n for x, y in zip(ig, ig[1:]))) and all(y - x >= n for x, y in zip(cf, cf[1:])):
+        return True
+    else:
+        return False
+
+timetables = generate_random_timetables()
+
+while not check(timetables):
+    timetables = generate_random_timetables()
+
+df = create_dataframe(timetables)
+print(df)
 counter = 1
-timetables_writer = pd.ExcelWriter("final.xlsx", engine="xlsxwriter")
+sheet_name = "1"
+writer = pd.ExcelWriter("timetables.xlsx", engine="xlsxwriter")
 
 for i in ships:
-    data = pd.read_excel("temp.xlsx", names=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_'])
-    igo_data = data.loc[data["ΠΛΟΙΟ"] == i.name, "H"]
-    cfu_data = data.loc[data["ΠΛΟΙΟ_"] == i.name, "K"]
-
+    igo_data = df.loc[df["IGO_SHIP"] == i.name, "IGO-CFU"]
+    cfu_data = df.loc[df["CFU_SHIP"] == i.name, "CFU-IGO"]
     pd.DataFrame(map(list, zip_longest(igo_data, cfu_data)),
-                 columns=['K', 'H'],
-                 ).to_excel(timetables_writer, sheet_name='1', startrow=counter, startcol=1, index=False)
+                 columns=['K', 'H']).to_excel(excel_writer=writer,
+                                              sheet_name=sheet_name,
+                                              startrow=counter,
+                                              startcol=6,
+                                              index=False)
     counter += 5
 
-pd.DataFrame(map(list, zip(igo_times, igo_ships, cfu_times, cfu_ships)),
-             columns=['H', 'ΠΛΟΙΟ', 'K', 'ΠΛΟΙΟ_']
-             ).to_excel(timetables_writer, sheet_name='1', startrow=1, startcol=4, index=False)
-
-timetables_writer.save()
+df.to_excel(writer, sheet_name=sheet_name, startrow=1, startcol=1, index=False)
+writer.save()
