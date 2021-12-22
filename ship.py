@@ -1,19 +1,14 @@
 import datetime
+import itertools
 
 
 class Ship:
-    def __init__(self, total_departures, duration, name, starting_port, start, schedule=[], timetables=None):
+    def __init__(self, total_departures, duration, name, starting_port, start):
         self.start = start
         self.starting_port = starting_port
         self.name = name
         self.duration = duration
         self.total_departures = total_departures
-        self.schedule = schedule
-        self.timetables = timetables
-        self.set_default_values()
-        self.create_schedule()
-
-    def set_default_values(self):
         self.loading = datetime.timedelta(minutes=30)
         self.unloading = datetime.timedelta(minutes=15)
         self.full_shift = datetime.timedelta(hours=13)
@@ -23,104 +18,39 @@ class Ship:
         self.trip_time = datetime.timedelta(hours=self.duration[0], minutes=self.duration[1])
         self.shift_start = self.first_departure - datetime.timedelta(minutes=30)
         self.shift_end = self.shift_start + self.full_shift
-
-    def create_schedule(self):
-        dep = self.first_departure
-        schedule = [dep]
-        br = self.break_
-        arrival = dep + self.trip_time + self.unloading
-
-        for i in range(self.total_departures - 1):
-            if arrival >= self.shift_start + datetime.timedelta(
-                    hours=3) and arrival + self.break_ <= self.shift_start + datetime.timedelta(hours=6):
-                n = dep + self.loading + self.trip_time + self.unloading + br
-                arrival = n + self.trip_time + self.unloading
-                br = datetime.timedelta(hours=0)
-                # print(f"ΔΙΑΚΟΠΗ {(n - self.break_ - self.loading).time()} ΜΕ {(n - self.loading).time()}")
-            else:
-                n = dep + self.trip_time + self.unloading + self.loading
-                arrival = n + self.trip_time + self.unloading
-            if (n + self.trip_time + self.unloading) > self.shift_end:
-                break
-            else:
-                schedule.append(n)
-                dep = n
-        if br == self.break_:
-            self.schedule = schedule
-        else:
-            self.schedule = schedule
+        self.schedules = self.call()
 
     def create_random_schedules(self):
+        possible_departures = [self.first_departure]
+        p = self.first_departure
 
-        sch_ = self.schedule
-        all = []
-        all += sch_
-        t = self.total_departures - 1
-        time_needed = self.trip_time + self.loading + self.unloading
+        while p <= self.shift_end - self.trip_time - self.loading:
+            p += self.step
+            possible_departures.append(p)
 
-        try:
-            while sch_[t] + self.trip_time + self.unloading <= self.shift_end - self.step:
-                sch_[t] = sch_[t] + self.step
-                all += sch_
-                for i in range(t, 1, -1):
-                    while sch_[i] - time_needed >= sch_[i - 1]:
-                        sch_[i - 1] = sch_[i - 1] + self.step
-                        all += sch_
-        except IndexError:
-            print("ΠΛΟΙΟ ΕΚΤΟΣ ΩΡΑΡΙΟΥ")
-            exit()
+        combinations = itertools.combinations(possible_departures, self.total_departures)
+        valid = [list(i) for i in combinations if all(x + self.trip_time + self.unloading + self.loading <= y for x, y in zip(i, i[1:])) and i[0] == self.first_departure]
 
+        return valid
 
-        t = 1
-        while t < self.total_departures:
-            while sch_[t] > sch_[t - 1] + time_needed:
-                sch_[t] = sch_[t] - self.step
-                all += sch_
-                if self.total_departures >= 4:
-                    if sch_[3] - sch_[2] >= time_needed + 3 * self.break_:
-                        t += 1
-                else:
-                    if sch_[2] - sch_[1] >= time_needed + 3 * self.break_:
-                        t += 1
-            t += 1
+    def check_valid_break(self, schedules):
+        valid_schedules = []
+        arrival = self.trip_time + self.unloading
+        three_hour_mark = self.shift_start + datetime.timedelta(hours=3)
+        six_hour_mark = self.shift_start + datetime.timedelta(hours=6)
 
-        return all
+        for schedule in schedules:
+            for t in range(2):
+                if schedule[t] + arrival >= three_hour_mark or three_hour_mark + self.break_ + self.loading <= schedule[t+1]:
+                    try:
+                        if schedule[t] + arrival + self.break_ + self.loading <= schedule[t+1]:
+                            if schedule[t] + arrival + self.break_ <= six_hour_mark:
+                                valid_schedules.append(schedule)
+                    except IndexError:
+                        continue
+        return valid_schedules
 
-    def check_valid_break(self, schedule):
-        x = False
-        t = self.total_departures - 1
-        for _ in schedule[::-1]:
-            time_between = schedule[t] - schedule[t - 1]
-            t -= 1
-            if time_between >= self.loading + self.trip_time + self.unloading + self.break_:
-                s = schedule[t] + self.trip_time + self.unloading
-                f = s + self.break_
-                if f <= self.shift_start + datetime.timedelta(
-                        hours=6) and s >= self.shift_start + datetime.timedelta(hours=3):
-                    #print(f"ΔΙΑΚΟΠΗ {(f - self.break_).time()} ΜΕ {f.time()}")
-                    x = True
-                    return x
-                else:
-                    s = self.shift_start + datetime.timedelta(hours=3)
-                    if s + self.break_ + self.loading <= schedule[1]:
-                        #print(f"ΔΙΑΚΟΠΗ {s.time()} ΜΕ {(s + self.break_).time()}")
-                        x = True
-                        return x
-        return x
-
-    def clean_data(self, final_):
-        valid_ = []
-        timetables = [final_[x:x + self.total_departures] for x in range(0, len(final_), self.total_departures)]
-        for i in timetables:
-            b = self.check_valid_break(i)
-            if b:
-                if i not in valid_:
-                    valid_.append(i)
-        self.timetables = valid_
-
-
-
-
-
-
-
+    def call(self):
+        combinations = self.create_random_schedules()
+        valid_schedules = self.check_valid_break(combinations)
+        return valid_schedules
