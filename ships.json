@@ -1,0 +1,86 @@
+[
+  {
+    "name": "ΕΡΜΗΣ",
+    "start": [9, 0],
+    "total_departures": 4,
+    "starting_port": "K",
+    "duration": [1, 15]
+  },
+  {
+    "name": "ΑΓΙΟΣ ΣΠΥΡΙΔΩΝ",
+    "start": [12, 45],
+    "total_departures": 4,
+    "starting_port": "K",
+    "duration": [1, 30]
+  },
+  {
+    "name": "ΑΓΙΑ ΕΙΡΗΝΗ",
+    "start": [5, 0],
+    "total_departures": 3,
+    "starting_port": "K",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΕΛΕΝΗ",
+    "start": [2, 30],
+    "total_departures": 3,
+    "starting_port": "H",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΝΑΝΤΗ",
+    "start": [10, 0],
+    "total_departures": 4,
+    "starting_port": "H",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΙΩΝΑΣ",
+    "start": [4, 15],
+    "total_departures": 4,
+    "starting_port": "H",
+    "duration": [1, 30]
+  },
+  {
+    "name": "ΑΓΙΑ ΘΕΟΔΩΡΑ",
+    "start": [9, 30],
+    "total_departures": 4,
+    "starting_port": "K",
+    "duration": [1, 30]
+  },
+  {
+    "name": "ΚΕΡΚΥΡΑ ΕΞΠΡΕΣ",
+    "start": [10, 0],
+    "total_departures": 4,
+    "starting_port": "K",
+    "duration": [1, 15]
+  },
+  {
+    "name": "ΚΕΡΚΥΡΑ",
+    "start": [11, 45],
+    "total_departures": 3,
+    "starting_port": "K",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΑΛΚΙΝΟΟΣ",
+    "start": [8, 30],
+    "total_departures": 3,
+    "starting_port": "H",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΜΕΝΕΚΡΑΤΗΣ",
+    "start": [7, 15],
+    "total_departures": 4,
+    "starting_port": "H",
+    "duration": [1, 45]
+  },
+  {
+    "name": "ΑΝΩ ΧΩΡΑ ΙΙ",
+    "start": [3, 0],
+    "total_departures": 4,
+    "starting_port": "H",
+    "duration": [1, 30]
+  }
+]
